@@ -1,5 +1,6 @@
 # Script for extracting single leaves form a sheet with multiple samples
 import cv2
+import os
 
 class InstanceExtractor():
     def __init__(self):
@@ -18,8 +19,11 @@ class InstanceExtractor():
         self.instance_id = 0
         self.input_path = input_path
         self.output_path = output_path
-        ## TODO List sheets in input folder
-        sheet_paths = []
+
+        # List sheets in input folder
+        sheet_paths = [os.path.join(self.input_path, fn) for fn in os.listdir(self.input_path) if fn.endswith(".jpg")]
+
+        # Process each sheet
         for sheet_path in sheet_paths:
             # TODO Load image
             # Extract instances
