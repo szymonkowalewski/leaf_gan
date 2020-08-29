@@ -18,7 +18,7 @@ class InstanceExtractor():
         # Heavy threshold as background is supposed to be white
         ret,thresh_img = cv2.threshold(gray_img,200,255,cv2.THRESH_BINARY_INV)
         # Extract conneted components
-        ret, lab, stats, centroid = cv2.connectedComponentsWithStats(thresh_img)
+        ret, label_img, stats, centroid = cv2.connectedComponentsWithStats(thresh_img)
         
         # Process only "large" components
         for idx, stat in enumerate(stats):
@@ -26,15 +26,14 @@ class InstanceExtractor():
             if idx != 0 and stat[cv2.CC_STAT_AREA]>1000:
                 print("Idx %d, pixels %d" % (idx, stat[cv2.CC_STAT_AREA]))
                 # Prepare blank instance image
-                instance_image = np.zeros((stat[cv2.CC_STAT_HEIGHT],
+                instance_img = np.zeros((stat[cv2.CC_STAT_HEIGHT],
                                            stat[cv2.CC_STAT_WIDTH],3), np.uint8)
                 # Find component indices
-                tmp_indices = np.where(lab == idx)
-                indices = list(zip(tmp_indices[0], tmp_indices[1]))
+                indices = np.where(label_img == idx)
                 # Copy pixels
-                for indice in indices:
-                    instance_image[indice[0] - stat[cv2.CC_STAT_TOP],indice[1] - stat[cv2.CC_STAT_LEFT],:] = sheet_image[indice[0],indice[1],:]
-                extracted_instances.append(instance_image)
+                for indice in zip(indices[0], indices[1]):
+                    instance_img[indice[0] - stat[cv2.CC_STAT_TOP],indice[1] - stat[cv2.CC_STAT_LEFT],:] = sheet_image[indice[0],indice[1],:]
+                extracted_instances.append(instance_img)
         return extracted_instances
 
     def pad_instance(self, instance_image):
