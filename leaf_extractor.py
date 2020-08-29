@@ -53,7 +53,8 @@ class InstanceExtractor():
 
         # Process each sheet
         for sheet_path in sheet_paths:
-            # TODO Load image
+            # Load image
+            sheet = cv2.imread(sheet_path)
             # Extract instances
             instances = self.extract_instances(sheet)
             for instance in instances:
