@@ -7,7 +7,15 @@ class InstanceExtractor():
         self.instance_id = 0
 
     def extract_instances(self, sheet_image):
-        pass
+        # Scale down as scans are super big
+        width = int(sheet_image.shape[1] * 0.4)
+        height = int(sheet_image.shape[0] * 0.4)
+        sheet_image = cv2.resize(sheet_image, (width, height))
+        # Convert to grayscale
+        gray_img = cv2.cvtColor(sheet_image, cv2.COLOR_BGR2GRAY)
+        # Heavy threshold as background is supposed to be white
+        ret,thresh_img = cv2.threshold(gray_img,200,255,cv2.THRESH_BINARY)
+        return []
 
     def pad_instance(self, instance_image):
         pass
