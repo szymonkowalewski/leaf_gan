@@ -14,7 +14,16 @@ class InstanceExtractor():
         # Convert to grayscale
         gray_img = cv2.cvtColor(sheet_image, cv2.COLOR_BGR2GRAY)
         # Heavy threshold as background is supposed to be white
-        ret,thresh_img = cv2.threshold(gray_img,200,255,cv2.THRESH_BINARY)
+        ret,thresh_img = cv2.threshold(gray_img,200,255,cv2.THRESH_BINARY_INV)
+        # Extract conneted components
+        ret, lab, stats, _ = cv2.connectedComponentsWithStats(thresh_img)
+        
+        # Process only "large" components
+        for idx, stat in enumerate(stats):
+            # idx is 0 for background??? stat[4] is num pixels
+            if idx != 0 and stat[4]>1000:
+                print("Idx %d, pixels %d" % (idx, stat[4]))
+        
         return []
 
     def pad_instance(self, instance_image):
