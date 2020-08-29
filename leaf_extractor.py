@@ -1,30 +1,41 @@
 # Script for extracting single leaves form a sheet with multiple samples
 import cv2
 import os
+import numpy as np
 
 class InstanceExtractor():
     def __init__(self):
         self.instance_id = 0
 
     def extract_instances(self, sheet_image):
+        extracted_instances = []
         # Scale down as scans are super big
-        width = int(sheet_image.shape[1] * 0.4)
-        height = int(sheet_image.shape[0] * 0.4)
+        width = int(sheet_image.shape[1] * 0.1)
+        height = int(sheet_image.shape[0] * 0.1)
         sheet_image = cv2.resize(sheet_image, (width, height))
         # Convert to grayscale
         gray_img = cv2.cvtColor(sheet_image, cv2.COLOR_BGR2GRAY)
         # Heavy threshold as background is supposed to be white
         ret,thresh_img = cv2.threshold(gray_img,200,255,cv2.THRESH_BINARY_INV)
         # Extract conneted components
-        ret, lab, stats, _ = cv2.connectedComponentsWithStats(thresh_img)
+        ret, lab, stats, centroid = cv2.connectedComponentsWithStats(thresh_img)
         
         # Process only "large" components
         for idx, stat in enumerate(stats):
-            # idx is 0 for background??? stat[4] is num pixels
-            if idx != 0 and stat[4]>1000:
-                print("Idx %d, pixels %d" % (idx, stat[4]))
-        
-        return []
+            # idx is 0 for background???
+            if idx != 0 and stat[cv2.CC_STAT_AREA]>1000:
+                print("Idx %d, pixels %d" % (idx, stat[cv2.CC_STAT_AREA]))
+                # Prepare blank instance image
+                instance_image = np.zeros((stat[cv2.CC_STAT_HEIGHT],
+                                           stat[cv2.CC_STAT_WIDTH],3), np.uint8)
+                # Find component indices
+                tmp_indices = np.where(lab == idx)
+                indices = list(zip(tmp_indices[0], tmp_indices[1]))
+                # Copy pixels
+                for indice in indices:
+                    instance_image[indice[0] - stat[cv2.CC_STAT_TOP],indice[1] - stat[cv2.CC_STAT_LEFT],:] = sheet_image[indice[0],indice[1],:]
+                extracted_instances.append(instance_image)
+        return extracted_instances
 
     def pad_instance(self, instance_image):
         pass
