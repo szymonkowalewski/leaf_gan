@@ -38,7 +38,7 @@ class InstanceExtractor():
         return extracted_instances
 
     def pad_instance(self, instance_image):
-        pass
+        return instance_image
 
     def save_instance(self, image):
         pass
