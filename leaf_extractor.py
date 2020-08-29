@@ -41,7 +41,9 @@ class InstanceExtractor():
         return instance_image
 
     def save_instance(self, image):
-        pass
+        file_name = "instance_" + str(self.instance_id) + ".jpg"
+        cv2.imwrite(os.path.join(self.output_path, file_name), image)
+        self.instance_id +=1
 
     def process_folder(self, input_path, output_path):
         self.instance_id = 0
