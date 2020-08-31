@@ -1,6 +1,7 @@
 # Script for extracting single leaves form a sheet with multiple samples
 import cv2
 import os
+import math
 import numpy as np
 
 class InstanceExtractor():
@@ -36,8 +37,36 @@ class InstanceExtractor():
                 extracted_instances.append(instance_img)
         return extracted_instances
 
-    def pad_instance(self, instance_image):
-        return instance_image
+    def pad_center_instance(self, instance_image, target_size=(200,1000)):
+        # Center of target image
+        img_cent_row = int(target_size[0]/2)
+        img_cent_col = int(target_size[1]/2)
+
+        # Pad to target size
+        padded_image = cv2.copyMakeBorder(instance_image,target_size[0] - instance_image.shape[0], 0,
+                                                         target_size[1] - instance_image.shape[1], 0,
+                                                         cv2.BORDER_CONSTANT,value=(255,255,255))
+        
+        # Extract binary mask (not optimal as this operation was already done in extract_instances)
+        gray_img = cv2.cvtColor(padded_image, cv2.COLOR_BGR2GRAY)
+        ret,thresh_img = cv2.threshold(gray_img,200,255,cv2.THRESH_BINARY_INV)        
+        
+        # Calculate moments, centroid and orientation
+        moments = cv2.moments(thresh_img)
+        centroid_col = moments["m10"]/moments["m00"]
+        centroid_row = moments["m01"]/moments["m00"]
+        orientation = 0.5*math.atan((2*moments["nu11"])/(moments["nu20"]-moments["nu02"]))
+        if moments["nu20"]<moments["nu02"]:
+            orientation += math.pi/2
+
+        # Prepare affine transforms: move centroid to image center, rotate to 0
+        t_matrix = np.float32([ [1,0,img_cent_col-centroid_col], [0,1,img_cent_row-centroid_row]])
+        rot_matrix = cv2.getRotationMatrix2D((img_cent_col, img_cent_row),math.degrees(orientation),1)
+        # Apply transformations
+        t_image = cv2.warpAffine(padded_image, t_matrix, (target_size[1], target_size[0]))
+        t_rot_image = cv2.warpAffine(t_image, rot_matrix, (target_size[1], target_size[0]))
+
+        return t_rot_image
 
     def save_instance(self, image):
         file_name = "instance_" + str(self.instance_id) + ".jpg"
@@ -60,6 +89,6 @@ class InstanceExtractor():
             instances = self.extract_instances(sheet)
             for instance in instances:
                 # Pad to equal size
-                padded_instance = self.pad_instance(instance)
+                padded_instance = self.pad_center_instance(instance)
                 # Save instance
                 self.save_instance(padded_instance)
