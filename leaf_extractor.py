@@ -27,7 +27,7 @@ class InstanceExtractor():
             if idx != 0 and stat[cv2.CC_STAT_AREA]>1000:
                 print("Idx %d, pixels %d" % (idx, stat[cv2.CC_STAT_AREA]))
                 # Prepare blank instance image
-                instance_img = np.zeros((stat[cv2.CC_STAT_HEIGHT],
+                instance_img = 255*np.ones((stat[cv2.CC_STAT_HEIGHT],
                                            stat[cv2.CC_STAT_WIDTH],3), np.uint8)
                 # Find component indices
                 indices = np.where(label_img == idx)
