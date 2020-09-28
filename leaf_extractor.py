@@ -9,6 +9,22 @@ class InstanceExtractor():
         self.instance_id = 0
         self.background_color = (255,255,255)        
 
+    def direction(self, centered_instance_image):
+        # TODO implement something faster
+        # Convert to grayscale
+        gray_img = cv2.cvtColor(centered_instance_image, cv2.COLOR_BGR2GRAY)
+        # Thresh to 1 for histogram
+        ret,thresh_img = cv2.threshold(gray_img,200,1,cv2.THRESH_BINARY_INV)
+        # Calculate histogram and see on which padding is larger
+        # This defines direction
+        # Replace with some better histogram analysis 
+        histogram = np.sum(thresh_img, axis=0)
+        for i in range(0, int(len(histogram/2))):
+            if histogram[i] != 0:
+                return 1
+            if histogram[len(histogram)-1-i] != 0:
+                return 0
+
     def extract_instances(self, sheet_image):
         extracted_instances = []
         # Scale down as scans are super big
@@ -66,6 +82,9 @@ class InstanceExtractor():
         t_image = cv2.warpAffine(padded_image, t_matrix, (target_size[1], target_size[0]), borderValue=self.background_color)
         t_rot_image = cv2.warpAffine(t_image, rot_matrix, (target_size[1], target_size[0]), borderValue=self.background_color)
 
+        # Flip if wrong direction
+        if self.direction(t_rot_image):
+            t_rot_image = cv2.flip(t_rot_image, 1)
 
         return t_rot_image
 
