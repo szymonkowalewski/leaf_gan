@@ -37,7 +37,7 @@ class InstanceExtractor():
                 extracted_instances.append(instance_img)
         return extracted_instances
 
-    def pad_center_instance(self, instance_image, target_size=(200,1000)):
+    def pad_center_instance(self, instance_image, target_size=(200,200)):
         # Center of target image
         img_cent_row = int(target_size[0]/2)
         img_cent_col = int(target_size[1]/2)
