@@ -7,6 +7,7 @@ import numpy as np
 class InstanceExtractor():
     def __init__(self):
         self.instance_id = 0
+        self.background_color = (255,255,255)        
 
     def extract_instances(self, sheet_image):
         extracted_instances = []
@@ -45,7 +46,7 @@ class InstanceExtractor():
         # Pad to target size
         padded_image = cv2.copyMakeBorder(instance_image,target_size[0] - instance_image.shape[0], 0,
                                                          target_size[1] - instance_image.shape[1], 0,
-                                                         cv2.BORDER_CONSTANT,value=(255,255,255))
+                                                         cv2.BORDER_CONSTANT,value=self.background_color)
         
         # Extract binary mask (not optimal as this operation was already done in extract_instances)
         gray_img = cv2.cvtColor(padded_image, cv2.COLOR_BGR2GRAY)
@@ -63,8 +64,9 @@ class InstanceExtractor():
         t_matrix = np.float32([ [1,0,img_cent_col-centroid_col], [0,1,img_cent_row-centroid_row]])
         rot_matrix = cv2.getRotationMatrix2D((img_cent_col, img_cent_row),math.degrees(orientation),1)
         # Apply transformations
-        t_image = cv2.warpAffine(padded_image, t_matrix, (target_size[1], target_size[0]), borderValue=(255,255,255))
-        t_rot_image = cv2.warpAffine(t_image, rot_matrix, (target_size[1], target_size[0]), borderValue=(255,255,255))
+        t_image = cv2.warpAffine(padded_image, t_matrix, (target_size[1], target_size[0]), borderValue=self.background_color)
+        t_rot_image = cv2.warpAffine(t_image, rot_matrix, (target_size[1], target_size[0]), borderValue=self.background_color)
+
 
         return t_rot_image
 
