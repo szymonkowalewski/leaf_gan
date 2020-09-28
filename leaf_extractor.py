@@ -63,8 +63,8 @@ class InstanceExtractor():
         t_matrix = np.float32([ [1,0,img_cent_col-centroid_col], [0,1,img_cent_row-centroid_row]])
         rot_matrix = cv2.getRotationMatrix2D((img_cent_col, img_cent_row),math.degrees(orientation),1)
         # Apply transformations
-        t_image = cv2.warpAffine(padded_image, t_matrix, (target_size[1], target_size[0]))
-        t_rot_image = cv2.warpAffine(t_image, rot_matrix, (target_size[1], target_size[0]))
+        t_image = cv2.warpAffine(padded_image, t_matrix, (target_size[1], target_size[0]), borderValue=(255,255,255))
+        t_rot_image = cv2.warpAffine(t_image, rot_matrix, (target_size[1], target_size[0]), borderValue=(255,255,255))
 
         return t_rot_image
 
