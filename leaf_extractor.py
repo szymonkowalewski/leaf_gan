@@ -26,7 +26,6 @@ class InstanceExtractor():
         for idx, stat in enumerate(stats):
             # idx is 0 for background???
             if idx != 0 and stat[cv2.CC_STAT_AREA]>1000:
-                print("Idx %d, pixels %d" % (idx, stat[cv2.CC_STAT_AREA]))
                 # Prepare blank instance image
                 instance_img = 255*np.ones((stat[cv2.CC_STAT_HEIGHT],
                                            stat[cv2.CC_STAT_WIDTH],3), np.uint8)
@@ -71,6 +70,7 @@ class InstanceExtractor():
         return t_rot_image
 
     def save_instance(self, image):
+        print("Finished instance " + str(self.instance_id))
         file_name = "instance_" + str(self.instance_id) + ".jpg"
         cv2.imwrite(os.path.join(self.output_path, file_name), image)
         self.instance_id +=1
